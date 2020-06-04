@@ -1,6 +1,7 @@
 import React, { Component,Fragment } from 'react'
-import './style.css'
 import TodoItem from './TodoItem'
+import axios from 'axios'
+import './style.css'
 
 class TodoList extends Component {
     constructor (props) {
@@ -9,8 +10,14 @@ class TodoList extends Component {
             inputValue: '',
             list: []
         }
+        this.handleInputChange = this.handleInputChange.bind(this)
+        this.handleBtnClick = this.handleBtnClick.bind(this)
+        this.handleDelClick = this.handleDelClick.bind(this)
     }
+
+
     render () {
+        // console.log('render')
         return (
             <Fragment>
                 <div>
@@ -19,48 +26,65 @@ class TodoList extends Component {
                         id="insert"
                         className="input"
                         value={this.state.inputValue}
-                        onChange={this.handleInputChange.bind(this)}
+                        onChange={this.handleInputChange}
                     />
-                    <button onClick={this.handleBtnClick.bind(this)}>提交</button>
+                    <button onClick={this.handleBtnClick}>提交</button>
                 </div>
                 <ul>
-                    {
-                        this.state.list.map((item, index) => {
-                            return (
-                                <div>
-                                    <TodoItem 
-                                    content={item} 
-                                    index={index}
-                                    deleteItem={this.handleDelClick.bind(this)}/>
-                                    {/*<li key={index} 
-                                    onClick={this.handleDelClick.bind(this, index)}
-                                    dangerouslySetInnerHTML={{__html: item}}
-                                    ></li>*/}
-                                </div>
-                            )
-                        })
-                    }
+                    {this.getTodoItem()}
                 </ul>
             </Fragment>
         )
     }
-    handleInputChange (e) {
-        this.setState({
-            inputValue: e.target.value
+
+    componentDidMount () {
+        axios.get('/api/todolist')
+            .then((res) => {
+                console.log(res.data)
+            })
+            .catch((err) => alert(err))
+    }
+    getTodoItem () {
+        return this.state.list.map((item, index) => {
+            return (
+                    <TodoItem
+                    key={index}
+                    content={item} 
+                    index={index}
+                    deleteItem={this.handleDelClick}/>
+            )
         })
+    }
+    handleInputChange (e) {
+        const value = e.target.value
+        this.setState(() => ({
+            inputValue: value
+        }))
+        // this.setState({
+        //     inputValue: e.target.value
+        // })
     }
     handleBtnClick () {
-        this.setState({
-            list: [...this.state.list, this.state.inputValue],
+        this.setState((preState) => ({
+            list: [...preState.list, preState.inputValue],
             inputValue: ''
-        })
+        }))
+        // this.setState({
+        //     list: [...this.state.list, this.state.inputValue],
+        //     inputValue: ''
+        // })
     }
     handleDelClick (index) {
-        const list = [...this.state.list]
-        list.splice(index, 1)
-        this.setState({
-            list: list
+        this.setState((preState) => {
+            const list = [...preState.list]
+            list.splice(index, 1)
+            return {list}
         })
+        // const list = [...this.state.list]
+        // list.splice(index, 1)
+        // this.setState({
+        //     list: list
+        // })
     }
 }
 
