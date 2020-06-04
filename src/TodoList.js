@@ -1,90 +1,61 @@
-import React, { Component,Fragment } from 'react'
-import TodoItem from './TodoItem'
-import axios from 'axios'
-import './style.css'
+import React, { Component } from 'react'
+import 'antd/dist/antd.css'
+import { Input, Button, List } from 'antd'
+import store from './store'
+import { getInputChangeAction, getAddItemAction, getDeleteItemAction } from './store/actionCreators'
 
 class TodoList extends Component {
     constructor (props) {
-        super(props)
-        this.state = {
-            inputValue: '',
-            list: []
-        }
+        super (props)
+        this.state = store.getState()
         this.handleInputChange = this.handleInputChange.bind(this)
+        this.handleStoreChange = this.handleStoreChange.bind(this)
         this.handleBtnClick = this.handleBtnClick.bind(this)
-        this.handleDelClick = this.handleDelClick.bind(this)
+        store.subscribe(this.handleStoreChange)
     }
 
-
     render () {
-        // console.log('render')
         return (
-            <Fragment>
+            <div style={{marginTop: '10px', marginLeft: '10px'}}>
                 <div>
-                    <label htmlFor="insert">输入内容</label>
-                    <input
-                        id="insert"
-                        className="input"
-                        value={this.state.inputValue}
-                        onChange={this.handleInputChange}
-                    />
-                    <button onClick={this.handleBtnClick}>提交</button>
+                    <Input 
+                    value={this.state.inputValue}
+                    placeholder="todo info"
+                    style={{ width:'300px', marginRight: '10px'}}
+                    onChange={this.handleInputChange}
+                    ></Input>
+                    <Button type="primary" onClick={this.handleBtnClick}>提交</Button>
                 </div>
-                <ul>
-                    {this.getTodoItem()}
-                </ul>
-            </Fragment>
+                <List
+                style={{marginTop: '10px', width: '300px'}}
+                bordered
+                dataSource={this.state.list}
+                renderItem={(item, index) => (
+                    <List.Item onClick={this.handleItemDelete.bind(this, index)}>{item}
+                    </List.Item>
+                )}
+                />
+            </div>
         )
     }
 
-    componentDidMount () {
-        axios.get('/api/todolist')
-            .then((res) => {
-                console.log(res.data)
-            })
-            .catch((err) => alert(err))
-    }
-    getTodoItem () {
-        return this.state.list.map((item, index) => {
-            return (
-                    <TodoItem
-                    key={index}
-                    content={item} 
-                    index={index}
-                    deleteItem={this.handleDelClick}/>
-            )
-        })
-    }
     handleInputChange (e) {
-        const value = e.target.value
-        this.setState(() => ({
-            inputValue: value
-        }))
-        // this.setState({
-        //     inputValue: e.target.value
-        // })
+        const action = getInputChangeAction(e.target.value)
+        store.dispatch(action)
     }
+
+    handleStoreChange () {
+        this.setState(store.getState())
+    }
+
     handleBtnClick () {
-        this.setState((preState) => ({
-            list: [...preState.list, preState.inputValue],
-            inputValue: ''
-        }))
-        // this.setState({
-        //     list: [...this.state.list, this.state.inputValue],
-        //     inputValue: ''
-        // })
+        const action = getAddItemAction()
+        store.dispatch(action)
     }
-    handleDelClick (index) {
-        this.setState((preState) => {
-            const list = [...preState.list]
-            list.splice(index, 1)
-            return {list}
-        })
-        // const list = [...this.state.list]
-        // list.splice(index, 1)
-        // this.setState({
-        //     list: list
-        // })
+
+    handleItemDelete (index) {
+        const action = getDeleteItemAction(index)
+        store.dispatch(action)
     }
 }
 
