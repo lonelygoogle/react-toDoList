@@ -2,7 +2,8 @@ import React, { Component } from 'react'
 import 'antd/dist/antd.css'
 import store from './store'
 import TodoListUI from './TodoListUI'
-import { getInputChangeAction, getAddItemAction, getDeleteItemAction, getTodoList } from './store/actionCreators'
+// import axios from 'axios'
+import { getInputChangeAction, getAddItemAction, getDeleteItemAction, getInitList } from './store/actionCreators'
 class TodoList extends Component {
     constructor (props) {
         super (props)
@@ -27,13 +28,9 @@ class TodoList extends Component {
     }
 
     componentDidMount () {
-        const action = getTodoList()
+        const action = getInitList()
+        console.log(action)
         store.dispatch(action)
-        // axios.get('/list.json').then((res) => {
-        //     const data = res.data
-        //     const action = initListAction(data)
-        //     store.dispatch(action)
-        // })
     }
 
     handleInputChange (e) {
@@ -47,6 +44,7 @@ class TodoList extends Component {
 
     handleBtnClick () {
         const action = getAddItemAction()
+        console.log(action)
         store.dispatch(action)
     }
 

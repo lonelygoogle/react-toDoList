@@ -16,6 +16,7 @@ export default (state = defaultState, action) => {
     if (action.type === ADD_LIST_ITEM) {
         const newState = JSON.parse(JSON.stringify(state))
         newState.list.push(newState.inputValue)
+        console.log('newState', newState)
         newState.inputValue = ''
         return newState
     }
